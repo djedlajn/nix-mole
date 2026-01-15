@@ -67,7 +67,7 @@ stdenvNoCC.mkDerivation {
     homepage = "https://github.com/tw93/Mole";
     changelog = "https://github.com/tw93/Mole/releases/tag/V${version}";
     license = lib.licenses.mit;
-    maintainers = with lib.maintainers; [ ];
+    maintainers = [ ];
     platforms = [
       "aarch64-darwin"
       "x86_64-darwin"
