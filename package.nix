@@ -24,7 +24,7 @@ let
 
 in
 stdenvNoCC.mkDerivation {
-  pname = "mole";
+  pname = "mole-cleaner";
   inherit version;
 
   src = fetchFromGitHub {
