@@ -4,6 +4,7 @@
   fetchFromGitHub,
   fetchurl,
   makeWrapper,
+  runCommand,
   coreutils,
   gdu,
 }:
@@ -23,7 +24,7 @@ let
   };
 
 in
-stdenvNoCC.mkDerivation {
+stdenvNoCC.mkDerivation (finalAttrs: {
   pname = "mole-cleaner";
   inherit version;
 
@@ -62,6 +63,11 @@ stdenvNoCC.mkDerivation {
     runHook postInstall
   '';
 
+  passthru.tests.help = runCommand "mole-cleaner-test" { } ''
+    ${finalAttrs.finalPackage}/bin/mole --help > /dev/null
+    touch $out
+  '';
+
   meta = {
     description = "A CLI tool for cleaning and optimizing macOS";
     homepage = "https://github.com/tw93/Mole";
@@ -74,4 +80,4 @@ stdenvNoCC.mkDerivation {
     ];
     mainProgram = "mole";
   };
-}
+})
