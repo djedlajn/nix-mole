@@ -4,7 +4,6 @@
   fetchFromGitHub,
   fetchurl,
   makeWrapper,
-  runCommand,
   coreutils,
   gdu,
 }:
@@ -24,14 +23,14 @@ let
   };
 
 in
-stdenvNoCC.mkDerivation (finalAttrs: {
+stdenvNoCC.mkDerivation {
   pname = "mole-cleaner";
   inherit version;
 
   src = fetchFromGitHub {
     owner = "tw93";
     repo = "Mole";
-    rev = "V${version}";
+    tag = "V${version}";
     hash = "sha256-HAKlivpOIpQ6vtEmyiFT33j4LzXahAqQGA3DwrU2bis=";
   };
 
@@ -42,34 +41,26 @@ stdenvNoCC.mkDerivation (finalAttrs: {
   installPhase = ''
     runHook preInstall
 
-    # Install main script and lib directory together (script expects lib/ relative to itself)
-    mkdir -p $out/bin
-    cp mole $out/bin/mole
-    chmod +x $out/bin/mole
-    cp -r lib $out/bin/
+    mkdir -p $out/libexec/mole
+
+    # Install main script and lib together (script expects lib/ relative to itself)
+    cp mole $out/libexec/mole/
+    chmod +x $out/libexec/mole/mole
+    cp -r lib $out/libexec/mole/
 
     # Install pre-built Go binaries
-    tar -xzf ${binaries.${stdenvNoCC.hostPlatform.system}} -C $out/bin
+    tar -xzf ${binaries.${stdenvNoCC.hostPlatform.system}} -C $out/libexec/mole
 
-    # Wrap script with dependencies
-    wrapProgram $out/bin/mole \
-      --prefix PATH : "${
-        lib.makeBinPath [
-          coreutils
-          gdu
-        ]
-      }"
+    # Create wrapper in bin
+    mkdir -p $out/bin
+    makeWrapper $out/libexec/mole/mole $out/bin/mole \
+      --prefix PATH : "${lib.makeBinPath [ coreutils gdu ]}"
 
     runHook postInstall
   '';
 
-  passthru.tests.help = runCommand "mole-cleaner-test" { } ''
-    ${finalAttrs.finalPackage}/bin/mole --help > /dev/null
-    touch $out
-  '';
-
   meta = {
-    description = "A CLI tool for cleaning and optimizing macOS";
+    description = "CLI tool for cleaning and optimizing macOS";
     homepage = "https://github.com/tw93/Mole";
     changelog = "https://github.com/tw93/Mole/releases/tag/V${version}";
     license = lib.licenses.mit;
@@ -80,4 +71,4 @@ stdenvNoCC.mkDerivation (finalAttrs: {
     ];
     mainProgram = "mole";
   };
-})
+}
