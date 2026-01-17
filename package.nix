@@ -54,7 +54,12 @@ stdenvNoCC.mkDerivation {
     # Create wrapper in bin
     mkdir -p $out/bin
     makeWrapper $out/libexec/mole/mole $out/bin/mole \
-      --prefix PATH : "${lib.makeBinPath [ coreutils gdu ]}"
+      --prefix PATH : "${
+        lib.makeBinPath [
+          coreutils
+          gdu
+        ]
+      }"
 
     runHook postInstall
   '';
